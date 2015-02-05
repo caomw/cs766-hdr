@@ -1,6 +1,6 @@
 %% Load exposure time
-expTime = 1 ./ load('TestImages/Test1-ExpTime.txt');
-B = log(expTime);
+expTimes = 1 ./ load('TestImages/Test1-ExpTime.txt');
+B = log(expTimes);
 %% Load images
 imgFiles = {'TestImages/Test1-1.jpg', 'TestImages/Test1-2.jpg', 'TestImages/Test1-3.jpg', 'TestImages/Test1-4.jpg', 'TestImages/Test1-5.jpg'};
 imgNum = length(imgFiles);
@@ -36,7 +36,7 @@ end
 %% Assign lamda value
 l = 20;
 %% Solve for g and lE
-[g,lE] = gsolve(Z,B,l,w);
+[g,lE] = gSolve(Z,B,l,w);
 %% Plot results
 pxVals = zeros(smpNum*imgNum,1);
 lgExps = zeros(length(pxVals),1);
@@ -52,7 +52,7 @@ figure;
 hold on;
 scatter(lgExps,pxVals,12,[0.6 0.6 1]);
 plot(g,1:256,'r');
-xlim([-10 10]);
+xlim([-8 8]);
 ylim([0 255]);
 xlabel('log exposure X');
 ylabel('pixel value Z');

@@ -1,5 +1,5 @@
 %% Construct radiance map
-E = radiance(gImgs,B,g,w);
+E = mergeExps(gImgs,B,g,w);
 %% Display radiance map in false color
 figure;
 imshow(E,[],'Colormap',jet(256));

@@ -1,5 +1,5 @@
 %
-% radiance.m
+% mergeExps.m
 % 
 % Arguments:
 %
@@ -8,7 +8,7 @@
 % g(z)
 % w(z)
 %
-function [E] = radiance(Z,B,g,w)
+function E = mergeExps(Z,B,g,w)
 %% Read image information
 height = size(Z,1);
 width = size(Z,2);
