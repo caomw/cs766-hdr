@@ -1,7 +1,7 @@
-% Load exposure time
+%% Load exposure time
 expTime = 1 ./ load('TestImages/Test1-ExpTime.txt');
-B = log2(expTime);
-% Load images
+B = log(expTime);
+%% Load images
 imgFiles = {'TestImages/Test1-1.jpg', 'TestImages/Test1-2.jpg', 'TestImages/Test1-3.jpg', 'TestImages/Test1-4.jpg', 'TestImages/Test1-5.jpg'};
 imgNum = length(imgFiles);
 imgInfo = imfinfo(char(imgFiles(1)));
@@ -12,7 +12,7 @@ for i=1:imgNum
     imgs(:,:,:,i) = imread(char(imgFiles(i)));
 end
 gImgs(:,:,:) = imgs(:,:,2,:);
-% Sample pixels
+%% Sample pixels
 smpNumSqrt = round(sqrt(2*256/(imgNum - 1)));
 smpNum = smpNumSqrt*smpNumSqrt;
 k = 1;
@@ -25,7 +25,7 @@ for i=1:smpNumSqrt
        k = k+1;
    end
 end
-% Construct weighting function
+%% Construct weighting function
 w = zeros(256,1);
 for i=1:128
     w(i) = i - 1;
@@ -33,11 +33,11 @@ end
 for i=129:256
     w(i) = 256 - i;
 end
-% Assign lamda value
+%% Assign lamda value
 l = 20;
-% Solve for g and lE
+%% Solve for g and lE
 [g,lE] = gsolve(Z,B,l,w);
-% Plot results
+%% Plot results
 pxVals = zeros(smpNum*imgNum,1);
 lgExps = zeros(length(pxVals),1);
 k = 1;
