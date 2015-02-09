@@ -1,34 +1,34 @@
 %% Input
-expTimes = 1 ./ load('TestImages/memorial/memorial-shutterspeeds.txt');
-imgFiles = {'TestImages/memorial/memorial0061.png','TestImages/memorial/memorial0062.png','TestImages/memorial/memorial0063.png','TestImages/memorial/memorial0064.png','TestImages/memorial/memorial0065.png','TestImages/memorial/memorial0066.png','TestImages/memorial/memorial0067.png','TestImages/memorial/memorial0068.png','TestImages/memorial/memorial0069.png','TestImages/memorial/memorial0070.png','TestImages/memorial/memorial0071.png','TestImages/memorial/memorial0072.png','TestImages/memorial/memorial0073.png','TestImages/memorial/memorial0074.png','TestImages/memorial/memorial0075.png','TestImages/memorial/memorial0076.png'};
+expTimes = 1 ./ load('TestImages/Test2-ExpTime.txt');
+imgFiles = {'TestImages/Test2-1.png', 'TestImages/Test2-2.png', 'TestImages/Test2-3.png', 'TestImages/Test2-4.png', 'TestImages/Test2-5.png', 'TestImages/Test2-6.png', 'TestImages/Test2-7.png', 'TestImages/Test2-8.png', 'TestImages/Test2-9.png', 'TestImages/Test2-10.png', 'TestImages/Test2-11.png', 'TestImages/Test2-12.png', 'TestImages/Test2-13.png', 'TestImages/Test2-14.png', 'TestImages/Test2-15.png', 'TestImages/Test2-16.png'};
 
 %% Build rad map and save file
 radmap = makeRadmap(imgFiles,expTimes,20);
-hdrwrite(radmap,'TestImages/memorial/memorial.hdr');
-hdrImage = hdrread('TestImages/memorial/memorial.hdr');
+hdrwrite(radmap,'TestImages/Test2.hdr');
+%hdrImage = hdrread('TestImages/Test2.hdr');
 
 % Reinhard basic implementation of tone map
-ReinhardRGB = toneMapBasic(hdrImage);
+ReinhardRGB = toneMapBasic(radmap);
 figure;
 imshow(ReinhardRGB)
 title('Reinhard')
 
 % gamma compression tone mapping
 gamma = 0.5;
-GammaRGB = toneMapGamma(hdrImage, gamma);
+GammaRGB = toneMapGamma(radmap, gamma);
 figure;
 imshow(GammaRGB)
 title('Gamma')
 
 % Drago et al. tone mapping algorithm
 b = 0.85; %tuneable 0.7 - 1.0 (default is 0.85)
-DragoRGB = toneMap(hdrImage, b);
+DragoRGB = toneMapDrago(radmap, b);
 figure;
 imshow(DragoRGB)
 title('Drago')
 
 % compare with built in tonemap
-builtInRGB = tonemap(hdrImage);
+builtInRGB = tonemap(radmap);
 figure;
 imshow(builtInRGB)
 title('MATLAB builtin')

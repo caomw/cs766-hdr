@@ -8,7 +8,7 @@
 % Input: radMap - the RGB radiance map; b - the bias parameter (0.85 works best typically)
 % Output: image - the Low Dynamic Range, toned-mapped RGB image
 
-function [image] = toneMap(radMap, b)
+function [image] = toneMapDrago(radMap, b)
 %convert to Yxy color space
 [Yxy, sum] = RGBtoYxy(radMap);
 
