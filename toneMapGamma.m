@@ -9,4 +9,6 @@ function [image] = toneMapGamma(radMap, gamma)
     image(:,:,1) = A(1) * (radMap(:,:,1) .^ gamma);
     image(:,:,2) = A(2) * (radMap(:,:,2) .^ gamma);
     image(:,:,3) = A(3) * (radMap(:,:,3) .^ gamma);
+    
+    image = real(image);
 end
