@@ -22,7 +22,7 @@ function varargout = hdr_gui(varargin)
 
 % Edit the above text to modify the response to help hdr_gui
 
-% Last Modified by GUIDE v2.5 09-Feb-2015 19:56:34
+% Last Modified by GUIDE v2.5 09-Feb-2015 22:11:30
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -150,9 +150,31 @@ for i = 1:size
 end
 
 close(h);
+set(handles.solve,'Enable','on');
 setappdata(handles.figure1,'hAxes',hAxes);
 setappdata(handles.figure1,'images',images);
 setappdata(handles.figure1,'exposureTimes',expTimes);
+
+% reset downstream data
+if isappdata(handles.figure1,'radMap')
+    ax = getappdata(handles.figure1,'radMapGraph');
+    cla(ax);
+    rmappdata(handles.figure1,'radMap')
+end
+
+if isappdata(handles.figure1,'radMapGraph')
+    rmappdata(handles.figure1,'radMapGraph')
+end
+
+if isappdata(handles.figure1,'ldrDrawing')
+    ax = getappdata(handles.figure1,'ldrDrawing');
+    cla(ax);
+    rmappdata(handles.figure1,'ldrDrawing');
+end
+
+set(handles.saveRadMap,'Enable','off');
+set(handles.toneMap,'Enable','off');
+
 
 
 
@@ -195,8 +217,8 @@ function solve_Callback(hObject, eventdata, handles)
 
 
 % --------------------------------------------------------------------
-function radMap_Callback(hObject, eventdata, handles)
-% hObject    handle to radMap (see GCBO)
+function saveRadMap_Callback(hObject, eventdata, handles)
+% hObject    handle to saveRadMap (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -208,3 +230,159 @@ function toneMap_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
+
+
+% --------------------------------------------------------------------
+function openHDR_Callback(hObject, eventdata, handles)
+% hObject    handle to openHDR (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% load exposure times
+[hdrName hdrPath] = uigetfile({'*.hdr;','HDR Files'},'Select HDR File','MultiSelect','off');
+
+%return if no values
+if hdrName == 0
+    return
+end
+
+% reset
+set(handles.solve,'Enable','off');
+
+if isappdata(handles.figure1,'radMap')
+    ax = getappdata(handles.figure1,'radMapGraph');
+    cla(ax);
+    rmappdata(handles.figure1,'radMap');
+end
+
+if isappdata(handles.figure1,'radMapGraph')
+    rmappdata(handles.figure1,'radMapGraph');
+end
+
+hAxes = getappdata(handles.figure1,'hAxes');
+if ~isempty(hAxes)
+    f = find ( ishandle(hAxes) & hAxes);
+    delete(hAxes(f));
+    rmappdata(handles.figure1,'hAxes');
+end
+
+if isappdata(handles.figure1,'ldrDrawing')
+    ax = getappdata(handles.figure1,'ldrDrawing');
+    cla(ax);
+    rmappdata(handles.figure1,'ldrDrawing');
+end
+
+% read rad map from file
+radMap = hdrread(fullfile(hdrPath, hdrName));
+
+% convert to luminance for heat map (false color image)
+delta = 0.00001;
+L_w = 0.2126*radMap(:,:,1) + 0.7152*radMap(:,:,2) + 0.0722*radMap(:,:,3);
+L_w_bar = exp(mean(log(L_w(:) + delta)));
+L = (0.09/L_w_bar)*L_w;
+
+x = 1 - (0.98 / 1); % x position (1 column)
+y = 1 - (0.98 / 1); % y position (1 row)
+axWidth = 0.9;
+axHight = 0.9;
+axesProp = {'DataAspectRatio' ,'Parent','PlotBoxAspectRatio','XGrid','YGrid'};
+axesVal = {[1.0 1.0 1.0], handles.uipanel4, [1.0 1.0 1.0], 'off', 'off'};
+radDrawing = axes('Position', [x y axWidth axHight], axesProp, axesVal);
+imshow(L,[],'Colormap',jet(256));
+
+setappdata(handles.figure1,'radMap',radMap);
+setappdata(handles.figure1,'radMapGraph',radDrawing);
+set(handles.toneMap,'Enable','on');
+
+
+% --------------------------------------------------------------------
+function drago_Callback(hObject, eventdata, handles)
+% hObject    handle to drago (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% reset
+if isappdata(handles.figure1,'ldrDrawing')
+    ax = getappdata(handles.figure1,'ldrDrawing');
+    cla(ax);
+    rmappdata(handles.figure1,'ldrDrawing');
+end
+
+beta = 0.85;
+radMap = getappdata(handles.figure1,'radMap');
+h = waitbar(0, 'Performing tone mapping...'); % start progress bar
+DragoRGB = toneMapDrago(radMap, beta);
+waitbar(1.0); % start progress bar
+close(h);
+
+x = 1 - (0.98 / 1); % x position (1 column)
+y = 1 - (0.98 / 1); % y position (1 row)
+axWidth = 0.9;
+axHight = 0.9;
+axesProp = {'DataAspectRatio' ,'Parent','PlotBoxAspectRatio','XGrid','YGrid'};
+axesVal = {[1.0 1.0 1.0], handles.uipanel2, [1.0 1.0 1.0], 'off', 'off'};
+ldrDrawing = axes('Position', [x y axWidth axHight], axesProp, axesVal);
+imshow(DragoRGB,[]);
+
+setappdata(handles.figure1,'ldrDrawing',ldrDrawing);
+
+
+% --------------------------------------------------------------------
+function reinhard_Callback(hObject, eventdata, handles)
+% hObject    handle to reinhard (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% reset
+if isappdata(handles.figure1,'ldrDrawing')
+    ax = getappdata(handles.figure1,'ldrDrawing');
+    cla(ax);
+    rmappdata(handles.figure1,'ldrDrawing');
+end
+
+radMap = getappdata(handles.figure1,'radMap');
+h = waitbar(0, 'Performing tone mapping...'); % start progress bar
+ReinhardRGB = toneMapBasic(radMap);
+waitbar(1.0); % start progress bar
+close(h);
+
+x = 1 - (0.98 / 1); % x position (1 column)
+y = 1 - (0.98 / 1); % y position (1 row)
+axWidth = 0.9;
+axHight = 0.9;
+axesProp = {'DataAspectRatio' ,'Parent','PlotBoxAspectRatio','XGrid','YGrid'};
+axesVal = {[1.0 1.0 1.0], handles.uipanel2, [1.0 1.0 1.0], 'off', 'off'};
+ldrDrawing = axes('Position', [x y axWidth axHight], axesProp, axesVal);
+imshow(ReinhardRGB,[]);
+
+setappdata(handles.figure1,'ldrDrawing',ldrDrawing);
+
+% --------------------------------------------------------------------
+function matlabToneMap_Callback(hObject, eventdata, handles)
+% hObject    handle to matlabToneMap (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% reset
+if isappdata(handles.figure1,'ldrDrawing')
+    ax = getappdata(handles.figure1,'ldrDrawing');
+    cla(ax);
+    rmappdata(handles.figure1,'ldrDrawing');
+end
+
+radMap = getappdata(handles.figure1,'radMap');
+h = waitbar(0, 'Performing tone mapping...'); % start progress bar
+builtInRGB = tonemap(radMap);
+waitbar(1.0); % start progress bar
+close(h);
+
+x = 1 - (0.98 / 1); % x position (1 column)
+y = 1 - (0.98 / 1); % y position (1 row)
+axWidth = 0.9;
+axHight = 0.9;
+axesProp = {'DataAspectRatio' ,'Parent','PlotBoxAspectRatio','XGrid','YGrid'};
+axesVal = {[1.0 1.0 1.0], handles.uipanel2, [1.0 1.0 1.0], 'off', 'off'};
+ldrDrawing = axes('Position', [x y axWidth axHight], axesProp, axesVal);
+imshow(builtInRGB,[]);
+
+setappdata(handles.figure1,'ldrDrawing',ldrDrawing);

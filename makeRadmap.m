@@ -1,4 +1,4 @@
-function radmap = makeRadmap(imgFiles,expTimes,smoothness)
+function [radmap] = makeRadmap(imgFiles,expTimes,smoothness)
 %% Load exposure time
 B = log(expTimes);
 %% Load images
