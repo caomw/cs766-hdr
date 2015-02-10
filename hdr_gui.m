@@ -93,7 +93,7 @@ end
     '*.*','All Files' },'Select Exposure File','MultiSelect','off');
 
 %return if no values
-if ~iscell(eFName)
+if eFName == 0
     return
 end
 
