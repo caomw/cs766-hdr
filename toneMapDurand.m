@@ -1,19 +1,24 @@
 % from Durand and Dorsey (2002)
 % incomplete trail
 
-function image = toneMapDurand(radmap, offset, scale)
-    Imap = radmap(:,:,1) * 0.299 + radmap(:,:,2) * 0.587 + radmap(:,:,3) * 0.114;
+function image = toneMapDurand(radmap, contrast)
+    Imap = (radmap(:,:,1) * 20 + radmap(:,:,2) * 40 + radmap(:,:,3) * 1) / 61;
     Rmap = radmap(:,:,1) ./ Imap;
     Gmap = radmap(:,:,2) ./ Imap;
     Bmap = radmap(:,:,3) ./ Imap;
-    Lmap = log2(Imap);
-    h = fspecial('gaussian', [5 5], 1); % should be bilateral
-    Base = imfilter(Lmap, h, 'replicate');
-    Detail = Lmap - Base;
-    Base2 = (Base - offset) * scale;
-    Omap = power(2, Base2 + Detail);
+    lImap = log10(Imap);
+    filter = fspecial('gaussian', [3 3], 0.5); % should be bilateral
+    lBase = imfilter(lImap, filter, 'replicate');
+    lDetail = lImap - lBase;
+    Scale = log10(contrast) / (max(max(lBase)) - min(min(lBase)));
+    Offset = max(max(lBase)) * Scale;
+    lOmap = lBase * Scale + lDetail - Offset;
+    Omap = 10 .^ lOmap;
     image(:,:,1) = Omap .* Rmap;
     image(:,:,2) = Omap .* Gmap;
     image(:,:,3) = Omap .* Bmap;
+    
+    maxVal = max(max(prctile(image,95)));
+    image = image / maxVal;
 end
 

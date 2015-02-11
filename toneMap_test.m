@@ -10,25 +10,25 @@ hdrwrite(radmap,'TestImages/Test2.hdr');
 % Reinhard basic implementation of tone map
 ReinhardRGB = toneMapBasic(radmap);
 figure;
-imshow(ReinhardRGB,[])
+imshow(ReinhardRGB)
 title('Reinhard')
 
 % gamma compression tone mapping
-gamma = 0.5;
+gamma = 0.15;
 GammaRGB = toneMapGamma(radmap, gamma);
 figure;
-imshow(GammaRGB,[])
+imshow(GammaRGB)
 title('Gamma')
 
 % Drago et al. tone mapping algorithm
 b = 0.85; %tuneable 0.7 - 1.0 (default is 0.85)
 DragoRGB = toneMapDrago(radmap, b);
 figure;
-imshow(DragoRGB,[])
+imshow(DragoRGB)
 title('Drago')
 
 % compare with built in tonemap
 builtInRGB = tonemap(radmap);
 figure;
-imshow(builtInRGB,[])
+imshow(builtInRGB)
 title('MATLAB builtin')
