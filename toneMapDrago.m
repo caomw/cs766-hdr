@@ -14,20 +14,16 @@ function [image] = toneMapDrago(radMap, b)
 
 N = size(Yxy(:,:,1),1) * size(Yxy(:,:,1),2);
 maxLum = max(max(Yxy(:,:,1)));
+
 logAvgLum = sum / N;
+
 avgLum = exp(logAvgLum);
 maxLumW = (maxLum / avgLum);
 
 %replace luminance values
-newLum = nan(size(Yxy(:,:,1)));
-coeff = 1 / log10(maxLumW + 1);
-for row = 1:size(Yxy(:,:,1),1)
-    for col = 1:size(Yxy(:,:,1),2)
-        L_w = Yxy(row,col,1) / avgLum;
-        newLum(row,col) = ( log(L_w + 1) / log(2 + bias((L_w / maxLumW), b) * 8) ) * coeff;
-    end
-end
-Yxy(:,:,1) = newLum;
+coeff = (100 * 0.01) / log10(maxLumW + 1);
+Yxy(:,:,1) = Yxy(:,:,1) ./ avgLum;
+Yxy(:,:,1) = ( log(Yxy(:,:,1) + 1) ./ log(2 + bias((Yxy(:,:,1) ./ maxLumW), b) .* 8) ) .* coeff;
 
 % convert back to RGB
 image = YxytoRGB(Yxy);
@@ -38,7 +34,7 @@ end
 
 % Bias power function
 function [bT] = bias(t ,b)
-bT = t ^ ( log(b) / log(0.5) );
+bT = t .^ ( log(b) / log(0.5) );
 end
 
 % RGB to Yxy
@@ -56,11 +52,6 @@ for row = 1:size(RGB,1)
     for col = 1:size(RGB,2)
         
         result = zeros(1,3);
-%         for i = 1:3
-%             result(i) = result(i) + RGB2Yxy(i,1) * RGB(row,col,1);
-%             result(i) = result(i) + RGB2Yxy(i,2) * RGB(row,col,2);
-%             result(i) = result(i) + RGB2Yxy(i,3) * RGB(row,col,3);
-%         end
         for i = 1:3
             result(i) = result(i) + RGB2Yxy(i,1) * RGB(row,col,1) + ...
                 RGB2Yxy(i,2) * RGB(row,col,2) + RGB2Yxy(i,3) * RGB(row,col,3);
@@ -72,10 +63,7 @@ for row = 1:size(RGB,1)
             Yxy(row,col,2) = result(1) / W;	% x
             Yxy(row,col,3) = result(2) / W;	% y
         else
-%             Yxy(row,col,1) = 0;     % Y
-%             Yxy(row,col,2) = 0;	% x
-%             Yxy(row,col,3) = 0;	% y
-            Yxy(row,col,:) = 0;	% y
+            Yxy(row,col,:) = 0;	
         end
         total = total + log(2.3e-5 + Yxy(row,col,1));
     end
@@ -112,9 +100,6 @@ for row = 1:size(RGB,1)
         RGB(row,col,3) = Z;
         result = zeros(1,3);
         for i = 1:3
-%             result(i) = result(i) + Yxy2RGB(i,1) * RGB(row,col,1);
-%             result(i) = result(i) + Yxy2RGB(i,2) * RGB(row,col,2);
-%             result(i) = result(i) + Yxy2RGB(i,3) * RGB(row,col,3);
             result(i) = result(i) + Yxy2RGB(i,1) * RGB(row,col,1) + ...
                 Yxy2RGB(i,2) * RGB(row,col,2) + Yxy2RGB(i,3) * RGB(row,col,3);
         end
@@ -141,6 +126,7 @@ elseif gammaval <= 1.9
 end
 
 image = nan(size(oldImage));
+
 for row = 1:size(oldImage,1)
     for col = 1:size(oldImage,2)
         %red

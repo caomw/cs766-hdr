@@ -1,9 +1,9 @@
 % Reinhard basic (no Automatic dodging-and-burning)
 
 function [image] = toneMapBasic(radMap)
-    d = 0.001;
+    d = 0.001; % should be a parameter (will change)
     N = size(radMap,1) * size(radMap,2);
-    a = 0.18;
+    a = 0.72; % should be a parameter (will change)
     
     % scale
     sums = sum(sum( log(d + radMap) )) ./ N;
