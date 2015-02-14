@@ -20,10 +20,10 @@ bZ = samplePxs(bImgs);
 %% Construct weighting function
 w = zeros(256,1);
 for i=1:128
-    w(i) = i - 1;
+    w(i) = i;
 end
 for i=129:256
-    w(i) = 256 - i;
+    w(i) = 257 - i;
 end
 %% Solve for g and lE
 rG = gSolve(rZ,B,smoothness,w);

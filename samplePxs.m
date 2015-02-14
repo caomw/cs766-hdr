@@ -1,7 +1,7 @@
 function Z = samplepxs(imgs)
 %% Really naive sampler
 imgNum = size(imgs,3);
-smpNumSqrt = round(sqrt(2*256/(imgNum - 1)));
+smpNumSqrt = round(sqrt(5*256/(imgNum - 1)));
 smpNum = smpNumSqrt*smpNumSqrt;
 height = size(imgs,1);
 width = size(imgs,2);
