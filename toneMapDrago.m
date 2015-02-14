@@ -10,12 +10,19 @@
 
 function [image] = toneMapDrago(radMap, b)
 %convert to Yxy color space
-[Yxy, sum] = RGBtoYxy(radMap);
+% [Yxy, logSum] = RGBtoYxy(radMap);
+xyz = rgb2xyz(radMap);
 
-N = size(Yxy(:,:,1),1) * size(Yxy(:,:,1),2);
+W = sum(xyz,3);
+Yxy(:,:,1) = xyz(:,:,2);     % Y
+Yxy(:,:,2) = xyz(:,:,1) ./ W;	% x
+Yxy(:,:,3) = xyz(:,:,2) ./ W;	% y
+
+N = numel(Yxy(:,:,1));
 maxLum = max(max(Yxy(:,:,1)));
 
-logAvgLum = sum / N;
+logSum = sum(log(reshape(Yxy(:,:,1), [1 N] )));
+logAvgLum = logSum / N;
 
 avgLum = exp(logAvgLum);
 maxLumW = (maxLum / avgLum);
@@ -26,7 +33,13 @@ Yxy(:,:,1) = Yxy(:,:,1) ./ avgLum;
 Yxy(:,:,1) = ( log(Yxy(:,:,1) + 1) ./ log(2 + bias((Yxy(:,:,1) ./ maxLumW), b) .* 8) ) .* coeff;
 
 % convert back to RGB
-image = YxytoRGB(Yxy);
+newW = Yxy(:,:,1) ./ Yxy(:,:,3);
+xyz(:,:,2) = Yxy(:,:,1);
+xyz(:,:,1) = newW .* Yxy(:,:,2);
+xyz(:,:,3) = newW -xyz(:,:,1) - xyz(:,:,2);
+image = xyz2rgb(xyz);
+
+% image = YxytoRGB(Yxy);
 
 % correct gamma
 image = fixGamma(image);
