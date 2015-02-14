@@ -27,6 +27,13 @@ figure;
 imshow(DragoRGB)
 title('Drago')
 
+% Durand et al. tone mapping algorithm
+contrast = 6;
+DurandRGB = toneMapDurand(radmap, contrast);
+figure;
+imshow(DurandRGB)
+title('Durand')
+
 % compare with built in tonemap
 builtInRGB = tonemap(radmap);
 figure;
