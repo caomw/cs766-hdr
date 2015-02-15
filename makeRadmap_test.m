@@ -5,4 +5,4 @@ imgFiles = {'TestImages/Test1-1.jpg', 'TestImages/Test1-2.jpg', 'TestImages/Test
 imgs = loadImages(imgFiles);
 radmap = makeRadmap(imgs,expTimes,20);
 %% Write to file
-hdrwrite(radmap,'TestImages/Test1.hdr');
+%hdrwrite(radmap,'TestImages/Test1.hdr');

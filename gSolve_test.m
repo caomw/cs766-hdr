@@ -6,21 +6,7 @@ imgFiles = {'TestImages/Test1-1.jpg', 'TestImages/Test1-2.jpg', 'TestImages/Test
 imgs = loadImages(imgFiles);
 gImgs(:,:,:) = imgs(:,:,2,:);
 %% Sample pixels
-imgNum = size(imgs,4);
-height = size(imgs,1);
-width = size(imgs,2);
-smpNumSqrt = round(sqrt(5*256/(imgNum - 1)));
-smpNum = smpNumSqrt*smpNumSqrt;
-k = 1;
-Z = zeros(smpNum,imgNum);
-for i=1:smpNumSqrt
-   for j=1:smpNumSqrt
-       y = round(i*height/(smpNumSqrt+1));
-       x = round(j*width/(smpNumSqrt+1));
-       Z(k,:) = gImgs(y,x,:);
-       k = k+1;
-   end
-end
+Z = samplePxs(gImgs);
 %% Construct weighting function
 w = zeros(256,1);
 for i=1:128
