@@ -28,47 +28,47 @@ end
 % Implementation of "A Fast Approximation of the Bilateral Filter using a Signal Processing Approach"
 % Modified from Jiawen(Kevin) Chen
 function output = bilateral(input, sigmaS, sigmaR)
-% parameters
-height = size(input, 1);
-width = size(input, 2);
-minVal = min(min(input));
-maxVal = max(max(input));
-deltaVal = maxVal - minVal;
-% data array
-dsWidth = floor((width - 1) / sigmaS) + 7;
-dsHeight = floor((height - 1) / sigmaS) + 7;
-dsDepth = floor(deltaVal / sigmaR) + 7;
-dsData = zeros(dsHeight, dsWidth, dsDepth);
-dsWeights = zeros( dsHeight, dsWidth, dsDepth );
-% downsampling
-[idxJ, idxI] = meshgrid(0 : width - 1, 0 : height - 1);
-di = round(idxI / sigmaS) + 4;
-dj = round(idxJ / sigmaS ) + 4;
-dz = round((input - minVal) / sigmaR) + 4;
-for k = 1 : numel(dz),
-    val = input(k);
-    dik = di(k);
-    djk = dj(k);
-    dzk = dz(k);
-    dsData(dik, djk, dzk) = dsData(dik, djk, dzk) + val;
-    dsWeights(dik, djk, dzk) = dsWeights(dik, djk, dzk) + 1;
-end
-% filtering
-[gX, gY, gZ] = meshgrid(0 : 2, 0 : 2, 0 : 2);
-gX = gX - 1;
-gY = gY - 1;
-gZ = gZ - 1;
-gSq = gX .^ 2 + gY .^ 2 + gZ .^ 2;
-kernel = exp( -0.5 * gSq );
-fDsData = convn(dsData, kernel, 'same');
-fDsWeights = convn(dsWeights, kernel, 'same');
-% normalizing
-fDsWeights(fDsWeights == 0) = -100;
-nDsData = fDsData ./ fDsWeights;
-nDsData(fDsWeights < -1) = 0;
-% upsampling
-di = (idxI / sigmaS) + 4;
-dj = (idxJ / sigmaS) + 4;
-dz = (input - minVal) / sigmaR + 4;
-output = interpn(nDsData, di, dj, dz);
+    % parameters
+    height = size(input, 1);
+    width = size(input, 2);
+    minVal = min(min(input));
+    maxVal = max(max(input));
+    deltaVal = maxVal - minVal;
+    % data array
+    dsWidth = floor((width - 1) / sigmaS) + 7;
+    dsHeight = floor((height - 1) / sigmaS) + 7;
+    dsDepth = floor(deltaVal / sigmaR) + 7;
+    dsData = zeros(dsHeight, dsWidth, dsDepth);
+    dsWeights = zeros( dsHeight, dsWidth, dsDepth );
+    % downsampling
+    [idxJ, idxI] = meshgrid(0 : width - 1, 0 : height - 1);
+    di = round(idxI / sigmaS) + 4;
+    dj = round(idxJ / sigmaS ) + 4;
+    dz = round((input - minVal) / sigmaR) + 4;
+    for k = 1 : numel(dz),
+        val = input(k);
+        dik = di(k);
+        djk = dj(k);
+        dzk = dz(k);
+        dsData(dik, djk, dzk) = dsData(dik, djk, dzk) + val;
+        dsWeights(dik, djk, dzk) = dsWeights(dik, djk, dzk) + 1;
+    end
+    % filtering
+    [gX, gY, gZ] = meshgrid(0 : 2, 0 : 2, 0 : 2);
+    gX = gX - 1;
+    gY = gY - 1;
+    gZ = gZ - 1;
+    gSq = gX .^ 2 + gY .^ 2 + gZ .^ 2;
+    kernel = exp( -0.5 * gSq );
+    fDsData = convn(dsData, kernel, 'same');
+    fDsWeights = convn(dsWeights, kernel, 'same');
+    % normalizing
+    fDsWeights(fDsWeights == 0) = -100;
+    nDsData = fDsData ./ fDsWeights;
+    nDsData(fDsWeights < -1) = 0;
+    % upsampling
+    di = (idxI / sigmaS) + 4;
+    dj = (idxJ / sigmaS) + 4;
+    dz = (input - minVal) / sigmaR + 4;
+    output = interpn(nDsData, di, dj, dz);
 end

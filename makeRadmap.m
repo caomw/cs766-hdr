@@ -1,15 +1,7 @@
-function [radmap] = makeRadmap(imgFiles,expTimes,smoothness)
+function [radmap] = makeRadmap(imgs,expTimes,smoothness)
 %% Load exposure time
 B = log(expTimes);
 %% Load images
-imgNum = length(imgFiles);
-imgInfo = imfinfo(char(imgFiles(1)));
-height = imgInfo.Height;
-width = imgInfo.Width;
-imgs = zeros(height,width,3,imgNum);
-for i=1:imgNum
-    imgs(:,:,:,i) = imread(char(imgFiles(i)));
-end
 rImgs(:,:,:) = imgs(:,:,1,:);
 gImgs(:,:,:) = imgs(:,:,2,:);
 bImgs(:,:,:) = imgs(:,:,3,:);

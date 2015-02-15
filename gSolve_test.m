@@ -3,17 +3,13 @@ expTimes = 1 ./ load('TestImages/Test1-ExpTime.txt');
 B = log(expTimes);
 %% Load images
 imgFiles = {'TestImages/Test1-1.jpg', 'TestImages/Test1-2.jpg', 'TestImages/Test1-3.jpg', 'TestImages/Test1-4.jpg', 'TestImages/Test1-5.jpg'};
-imgNum = length(imgFiles);
-imgInfo = imfinfo(char(imgFiles(1)));
-height = imgInfo.Height;
-width = imgInfo.Width;
-imgs = zeros(height,width,3,imgNum);
-for i=1:imgNum
-    imgs(:,:,:,i) = imread(char(imgFiles(i)));
-end
+imgs = loadImages(imgFiles);
 gImgs(:,:,:) = imgs(:,:,2,:);
 %% Sample pixels
-smpNumSqrt = round(sqrt(2*256/(imgNum - 1)));
+imgNum = size(imgs,4);
+height = size(imgs,1);
+width = size(imgs,2);
+smpNumSqrt = round(sqrt(5*256/(imgNum - 1)));
 smpNum = smpNumSqrt*smpNumSqrt;
 k = 1;
 Z = zeros(smpNum,imgNum);
