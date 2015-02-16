@@ -20,6 +20,8 @@ l = 20;
 %% Solve for g and lE
 [g,lE] = gSolve(Z,B,l,w);
 %% Plot results
+smpNum = size(Z,1);
+imgNum = size(Z,2);
 pxVals = zeros(smpNum*imgNum,1);
 lgExps = zeros(length(pxVals),1);
 k = 1;
