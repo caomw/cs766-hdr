@@ -1,3 +1,5 @@
+addpath(genpath('../')) % added to work with new directory structure
+
 %% Load exposure time
 expTimes = 1 ./ load('TestImages/Test1-ExpTime.txt');
 B = log(expTimes);
@@ -40,3 +42,5 @@ xlim([-8 8]);
 ylim([0 255]);
 xlabel('log exposure X');
 ylabel('pixel value Z');
+
+rmpath(genpath('../'))

@@ -1,9 +1,10 @@
-% Reinhard basic (no Automatic dodging-and-burning)
+% Reinhard basic (no local operator)
 
-function [image] = toneMapBasic(radMap)
-    d = 0.001; % should be a parameter (will change)
+% Input: radMap - hdr image; a - tuning paramter
+
+function [image] = toneMapBasic(radMap, a)
+    d = 0.000001; % to correct for log(0)
     N = size(radMap,1) * size(radMap,2);
-    a = 0.72; % should be a parameter (will change)
     
     % scale
     sums = sum(sum( log(d + radMap) )) ./ N;

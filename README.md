@@ -13,5 +13,6 @@ Ke Ma, Christopher Bodden
   - [X] Any tone mapping algorithms other than Reinhard's --> Drago et al. & Durand et al.
   - [ ] Implement one or more extensions listed in the HDR section of Chapter 10
   - [ ] Run a small experiment with HDR video
-* [ ] Finish GUI 
-* [ ] Documentation 
+* [X] Finish GUI 
+* [ ] Documentation
+* [ ] Clean up/Comment code

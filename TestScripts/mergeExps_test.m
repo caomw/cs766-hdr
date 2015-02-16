@@ -1,3 +1,5 @@
+addpath(genpath('../')) % added to work with new directory structure
+
 %% Construct radiance map
 E = mergeExps(gImgs,B,g,w);
 %% Display radiance map in false color
@@ -9,3 +11,5 @@ gamma = 0.025;
 newImg = power(E,gamma);
 figure;
 imshow(newImg,[]);
+
+rmpath(genpath('../'))

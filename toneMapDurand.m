@@ -1,5 +1,7 @@
 %% Durand Tone-mapping
 % Implementation of "Fast Bilateral Filtering for the Display of High-Dynamic-Range Images"
+
+% Input "radmap" must be of type double!
 function image = toneMapDurand(radmap, contrast)
     Imap = (radmap(:,:,1) * 20 + radmap(:,:,2) * 40 + radmap(:,:,3) * 1) / 61;
     Rmap = radmap(:,:,1) ./ Imap;

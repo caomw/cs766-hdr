@@ -1,4 +1,4 @@
-% Gamma Compression
+% Simple Gamma Compression
 
 function [image] = toneMapGamma(radMap, gamma)
     

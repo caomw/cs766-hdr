@@ -22,7 +22,7 @@ function varargout = hdr_gui(varargin)
 
 % Edit the above text to modify the response to help hdr_gui
 
-% Last Modified by GUIDE v2.5 09-Feb-2015 22:11:30
+% Last Modified by GUIDE v2.5 16-Feb-2015 08:51:06
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -57,6 +57,12 @@ handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
+
+% initialize tonemap default settings
+setappdata(handles.figure1,'GAMMA_gammaVal', 0.15);
+setappdata(handles.figure1,'DURAND_contrastVal', 6);
+setappdata(handles.figure1,'REINHARD_aVal', 0.36);
+setappdata(handles.figure1,'DRAGO_betaVal', 0.85);
 
 % UIWAIT makes hdr_gui wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -117,6 +123,8 @@ hAxes = zeros(size,1);
 
 axesProp = {'DataAspectRatio' ,'Parent','PlotBoxAspectRatio','XGrid','YGrid'};
 axesVal = {[1.0 1.0 1.0], handles.uipanel1, [1.0 1.0 1.0], 'off', 'off'};
+imageProp = {'ButtonDownFcn'};
+imageVal = {'enlargeImage( guidata(gcf) )'};
 
 % setup panel position for # of images
 ht = 0.25 * size;
@@ -141,7 +149,7 @@ for i = 1:size
     
     % draw image in axes
     im = imread(char(files(i)));
-    imagesc(im,'Parent',hAxes(i))
+    imagesc(im,'Parent',hAxes(i),imageProp,imageVal);
     axis(hAxes(i),'image');
     axis(hAxes(i),'off');
     images(:,:,:,i) = im;
@@ -151,6 +159,7 @@ end
 
 close(h);
 set(handles.solve,'Enable','on');
+set(handles.align,'Enable','on');
 setappdata(handles.figure1,'hAxes',hAxes);
 setappdata(handles.figure1,'images',images);
 setappdata(handles.figure1,'exposureTimes',expTimes);
@@ -172,10 +181,15 @@ if isappdata(handles.figure1,'ldrDrawing')
     rmappdata(handles.figure1,'ldrDrawing');
 end
 
+set(handles.red,'Visible','off');
+set(handles.green,'Visible','off');
+set(handles.blue,'Visible','off');
+cla(handles.red);
+cla(handles.green);
+cla(handles.blue);
+
 set(handles.saveRadMap,'Enable','off');
 set(handles.toneMap,'Enable','off');
-
-
 
 
 % --- Executes on slider movement.
@@ -214,6 +228,82 @@ function solve_Callback(hObject, eventdata, handles)
 % hObject    handle to solve (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+if isappdata(handles.figure1,'radMap')
+    rmappdata(handles.figure1,'radMap');
+end
+
+if isappdata(handles.figure1,'radMapGraph')
+    ax = getappdata(handles.figure1,'radMapGraph');
+    cla(ax);
+    rmappdata(handles.figure1,'radMapGraph');
+end
+
+images = getappdata(handles.figure1,'images');
+B = getappdata(handles.figure1,'exposureTimes');
+[radMap, rG, gG, bG, rPxVals, gPxVals, bPxVals, rLgExps, gLgExps, bLgExps] = makeRadmap(images,B,20);
+
+cla(handles.red);
+cla(handles.green);
+cla(handles.blue);
+
+graphProp = {'Visible'};
+graphVal = {'on'};
+
+%red
+axes(handles.red)
+set(handles.red,graphProp,graphVal);
+hold on;
+scatter(rLgExps,rPxVals,12,[0.6 0.6 1]);
+plot(rG,1:256,'r');
+xlim([-8 8]);
+ylim([0 255]);
+xlabel('log exposure X');
+ylabel('pixel value Z');
+title('Red Channel')
+
+%blue
+axes(handles.green)
+set(handles.green,graphProp,graphVal);
+hold on;
+scatter(gLgExps,gPxVals,12,[0.6 0.6 1]);
+plot(gG,1:256,'r');
+xlim([-8 8]);
+ylim([0 255]);
+xlabel('log exposure X');
+ylabel('pixel value Z');
+title('Green Channel')
+
+%blue
+axes(handles.blue)
+set(handles.blue,graphProp,graphVal);
+hold on;
+scatter(bLgExps,bPxVals,12,[0.6 0.6 1]);
+plot(bG,1:256,'r');
+xlim([-8 8]);
+ylim([0 255]);
+xlabel('log exposure X');
+ylabel('pixel value Z');
+title('Blue Channel')
+
+imageProp = {'ButtonDownFcn'};
+imageVal = {'enlargeImage( guidata(gcf), 1 )'};
+L = rgb2gray(radMap); % convert to greyscale for false color
+x = 1 - (0.98 / 1); % x position (1 column)
+y = 1 - (0.98 / 1); % y position (1 row)
+axWidth = 0.9;
+axHight = 0.9;
+axesProp = {'DataAspectRatio' ,'Parent','PlotBoxAspectRatio','XGrid','YGrid'};
+axesVal = {[1.0 1.0 1.0], handles.uipanel4, [1.0 1.0 1.0], 'off', 'off'};
+radDrawing = axes('Position', [x y axWidth axHight], axesProp, axesVal);
+imagesc(L,imageProp,imageVal);
+colormap(jet(256));
+axis(radDrawing,'image');
+axis(radDrawing,'off');
+
+setappdata(handles.figure1,'radMap',radMap);
+setappdata(handles.figure1,'radMapGraph',radDrawing);
+set(handles.toneMap,'Enable','on');
+set(handles.saveRadMap,'Enable','on');
 
 
 % --------------------------------------------------------------------
@@ -221,6 +311,17 @@ function saveRadMap_Callback(hObject, eventdata, handles)
 % hObject    handle to saveRadMap (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+if isappdata(handles.figure1,'radMap')
+    radMap = getappdata(handles.figure1,'radMap');
+    [fileName, path] = uiputfile({'*.hdr;','HDR Files'},'Save HDR File');
+    
+    %return if no values
+    if fileName == 0
+        return
+    end
+    
+    hdrwrite(radMap, fullfile(path, fileName));
+end
 
 
 % --------------------------------------------------------------------
@@ -228,8 +329,6 @@ function toneMap_Callback(hObject, eventdata, handles)
 % hObject    handle to toneMap (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
 
 
 % --------------------------------------------------------------------
@@ -248,14 +347,22 @@ end
 
 % reset
 set(handles.solve,'Enable','off');
+set(handles.align,'Enable','off');
+
+set(handles.red,'Visible','off');
+set(handles.green,'Visible','off');
+set(handles.blue,'Visible','off');
+cla(handles.red);
+cla(handles.green);
+cla(handles.blue);
 
 if isappdata(handles.figure1,'radMap')
-    ax = getappdata(handles.figure1,'radMapGraph');
-    cla(ax);
     rmappdata(handles.figure1,'radMap');
 end
 
 if isappdata(handles.figure1,'radMapGraph')
+    ax = getappdata(handles.figure1,'radMapGraph');
+    cla(ax);
     rmappdata(handles.figure1,'radMapGraph');
 end
 
@@ -275,12 +382,9 @@ end
 % read rad map from file
 radMap = hdrread(fullfile(hdrPath, hdrName));
 
-% convert to luminance for heat map (false color image)
-delta = 0.00001;
-L_w = 0.2126*radMap(:,:,1) + 0.7152*radMap(:,:,2) + 0.0722*radMap(:,:,3);
-L_w_bar = exp(mean(log(L_w(:) + delta)));
-L = (0.09/L_w_bar)*L_w;
-
+imageProp = {'ButtonDownFcn'};
+imageVal = {'enlargeImage( guidata(gcf), 1 )'};
+L = rgb2gray(radMap); % convert to greyscale for false color
 x = 1 - (0.98 / 1); % x position (1 column)
 y = 1 - (0.98 / 1); % y position (1 row)
 axWidth = 0.9;
@@ -288,11 +392,15 @@ axHight = 0.9;
 axesProp = {'DataAspectRatio' ,'Parent','PlotBoxAspectRatio','XGrid','YGrid'};
 axesVal = {[1.0 1.0 1.0], handles.uipanel4, [1.0 1.0 1.0], 'off', 'off'};
 radDrawing = axes('Position', [x y axWidth axHight], axesProp, axesVal);
-imshow(L,[],'Colormap',jet(256));
+imagesc(L,imageProp,imageVal);
+colormap(jet(256));
+axis(radDrawing,'image');
+axis(radDrawing,'off');
 
 setappdata(handles.figure1,'radMap',radMap);
 setappdata(handles.figure1,'radMapGraph',radDrawing);
 set(handles.toneMap,'Enable','on');
+set(handles.saveRadMap,'Enable','on');
 
 
 % --------------------------------------------------------------------
@@ -308,7 +416,7 @@ if isappdata(handles.figure1,'ldrDrawing')
     rmappdata(handles.figure1,'ldrDrawing');
 end
 
-beta = 0.85;
+beta = getappdata(handles.figure1,'DRAGO_betaVal');
 radMap = getappdata(handles.figure1,'radMap');
 h = waitbar(0, 'Performing tone mapping...'); % start progress bar
 DragoRGB = toneMapDrago(radMap, beta);
@@ -342,10 +450,13 @@ end
 
 radMap = getappdata(handles.figure1,'radMap');
 h = waitbar(0, 'Performing tone mapping...'); % start progress bar
-ReinhardRGB = toneMapBasic(radMap);
+a = getappdata(handles.figure1,'REINHARD_aVal');
+ReinhardRGB = toneMapBasic(radMap, a);
 waitbar(1.0); % start progress bar
 close(h);
 
+imageProp = {'ButtonDownFcn'};
+imageVal = {'enlargeImage( guidata(gcf) )'};
 x = 1 - (0.98 / 1); % x position (1 column)
 y = 1 - (0.98 / 1); % y position (1 row)
 axWidth = 0.9;
@@ -376,6 +487,8 @@ builtInRGB = tonemap(radMap);
 waitbar(1.0); % start progress bar
 close(h);
 
+imageProp = {'ButtonDownFcn'};
+imageVal = {'enlargeImage( guidata(gcf) )'};
 x = 1 - (0.98 / 1); % x position (1 column)
 y = 1 - (0.98 / 1); % y position (1 row)
 axWidth = 0.9;
@@ -386,3 +499,176 @@ ldrDrawing = axes('Position', [x y axWidth axHight], axesProp, axesVal);
 imshow(builtInRGB,[]);
 
 setappdata(handles.figure1,'ldrDrawing',ldrDrawing);
+
+
+% --------------------------------------------------------------------
+function align_Callback(hObject, eventdata, handles)
+% hObject    handle to align (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if isappdata(handles.figure1,'hAxes') && isappdata(handles.figure1,'images')
+    hAxes = getappdata(handles.figure1,'hAxes');
+    images = getappdata(handles.figure1,'images');
+    newImages = alignMTB(images, 0.2);
+    
+    for i = 1:size(newImages,4)
+        cla(hAxes(i)); % clear
+        imagesc(newImages(:,:,:,i),'Parent',hAxes(i))
+        axis(hAxes(i),'image');
+        axis(hAxes(i),'off');
+        images(:,:,:,i) = newImages(:,:,:,i);
+    end
+    
+    setappdata(handles.figure1,'hAxes',hAxes);
+    setappdata(handles.figure1,'images',images);
+end
+
+
+% --------------------------------------------------------------------
+function files_Callback(hObject, eventdata, handles)
+% hObject    handle to files (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function tools_Callback(hObject, eventdata, handles)
+% hObject    handle to tools (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function toneMapSettings_Callback(hObject, eventdata, handles)
+% hObject    handle to toneMapSettings (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% toneMapSettings = tone_map_settings();
+toneMapSettings = tone_map_settings();
+toneMapSettingsHandles = guidata(toneMapSettings);
+setappdata(toneMapSettingsHandles.figure1,'mainHandles',handles);
+
+% gamma options
+GAMMA_gamma = getappdata(handles.figure1,'GAMMA_gammaVal');
+set(toneMapSettingsHandles.gamma_text,'String', num2str(GAMMA_gamma), 'Value', GAMMA_gamma);
+set(toneMapSettingsHandles.gamma_slider, 'Value', GAMMA_gamma);
+
+% durand options
+DURAND_contrast = getappdata(handles.figure1,'DURAND_contrastVal');
+set(toneMapSettingsHandles.durand_text,'String', num2str(DURAND_contrast), 'Value', DURAND_contrast);
+set(toneMapSettingsHandles.durand_slider, 'Value', DURAND_contrast);
+
+% drago options
+DRAGO_beta = getappdata(handles.figure1,'DRAGO_betaVal');
+set(toneMapSettingsHandles.drago_text,'String', num2str(DRAGO_beta), 'Value', DRAGO_beta);
+set(toneMapSettingsHandles.drago_slider, 'Value', DRAGO_beta);
+
+% reinhard options
+REINHARD_a = getappdata(handles.figure1,'REINHARD_aVal');
+set(toneMapSettingsHandles.reinhard_text,'String', num2str(REINHARD_a), 'Value', REINHARD_a);
+set(toneMapSettingsHandles.reinhard_slider, 'Value', REINHARD_a);
+
+% make visible
+set(toneMapSettingsHandles.figure1,'Visible','on');
+
+
+% --------------------------------------------------------------------
+function durand_Callback(hObject, eventdata, handles)
+% hObject    handle to durand (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% reset
+if isappdata(handles.figure1,'ldrDrawing')
+    ax = getappdata(handles.figure1,'ldrDrawing');
+    cla(ax);
+    rmappdata(handles.figure1,'ldrDrawing');
+end
+
+contrast = getappdata(handles.figure1,'DURAND_contrastVal');
+radMap = getappdata(handles.figure1,'radMap');
+h = waitbar(0, 'Performing tone mapping...'); % start progress bar
+DurandRGB = toneMapDurand(double(radMap), contrast);
+waitbar(1.0); % start progress bar
+close(h);
+
+imageProp = {'ButtonDownFcn'};
+imageVal = {'enlargeImage( guidata(gcf) )'};
+x = 1 - (0.98 / 1); % x position (1 column)
+y = 1 - (0.98 / 1); % y position (1 row)
+axWidth = 0.9;
+axHight = 0.9;
+axesProp = {'DataAspectRatio' ,'Parent','PlotBoxAspectRatio','XGrid','YGrid'};
+axesVal = {[1.0 1.0 1.0], handles.uipanel2, [1.0 1.0 1.0], 'off', 'off'};
+ldrDrawing = axes('Position', [x y axWidth axHight], axesProp, axesVal);
+imshow(DurandRGB,[]);
+
+setappdata(handles.figure1,'ldrDrawing',ldrDrawing);
+
+
+% --------------------------------------------------------------------
+function gammaC_Callback(hObject, eventdata, handles)
+% hObject    handle to gammaC (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% reset
+if isappdata(handles.figure1,'ldrDrawing')
+    ax = getappdata(handles.figure1,'ldrDrawing');
+    cla(ax);
+    rmappdata(handles.figure1,'ldrDrawing');
+end
+
+gamma = getappdata(handles.figure1,'GAMMA_gammaVal');
+radMap = getappdata(handles.figure1,'radMap');
+h = waitbar(0, 'Performing tone mapping...'); % start progress bar
+GammaRGB = toneMapGamma(radMap, gamma);
+waitbar(1.0); % start progress bar
+close(h);
+
+imageProp = {'ButtonDownFcn'};
+imageVal = {'enlargeImage( guidata(gcf) )'};
+x = 1 - (0.98 / 1); % x position (1 column)
+y = 1 - (0.98 / 1); % y position (1 row)
+axWidth = 0.9;
+axHight = 0.9;
+axesProp = {'DataAspectRatio' ,'Parent','PlotBoxAspectRatio','XGrid','YGrid'};
+axesVal = {[1.0 1.0 1.0], handles.uipanel2, [1.0 1.0 1.0], 'off', 'off'};
+ldrDrawing = axes('Position', [x y axWidth axHight], axesProp, axesVal);
+imshow(GammaRGB,[]);
+
+setappdata(handles.figure1,'ldrDrawing',ldrDrawing);
+
+
+% --- Executes on mouse press over axes background.
+function red_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to red (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+newFig = figure();
+ax = copyobj(hObject,newFig);
+set(ax,'ActivePositionProperty', 'outerposition', 'Box', 'on', 'OuterPosition', [0 0 1 1], 'Position', [0.13 0.11 0.775 0.815], 'Units', 'normalized');
+
+
+% --- Executes on mouse press over axes background.
+function green_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to green (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+newFig = figure();
+ax = copyobj(hObject,newFig);
+set(ax,'ActivePositionProperty', 'outerposition', 'Box', 'on', 'OuterPosition', [0 0 1 1], 'Position', [0.13 0.11 0.775 0.815], 'Units', 'normalized');
+
+
+% --- Executes on mouse press over axes background.
+function blue_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to blue (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+newFig = figure();
+ax = copyobj(hObject,newFig);
+set(ax,'ActivePositionProperty', 'outerposition', 'Box', 'on', 'OuterPosition', [0 0 1 1], 'Position', [0.13 0.11 0.775 0.815], 'Units', 'normalized');

@@ -1,3 +1,5 @@
+addpath(genpath('../')) % added to work with new directory structure
+
 %% Input
 imgFiles = {'TestImages/Test3-1.jpg', 'TestImages/Test3-2.jpg', 'TestImages/Test3-3.jpg', 'TestImages/Test3-4.jpg'};
 %% Function call
@@ -20,3 +22,5 @@ imshow(alignedImg);
 %imwrite(alignedImgs(:,:,:,2), 'TestImages/Test3-2-Aligned.jpg','jpg');
 %imwrite(alignedImgs(:,:,:,3), 'TestImages/Test3-3-Aligned.jpg','jpg');
 %imwrite(alignedImgs(:,:,:,4), 'TestImages/Test3-4-Aligned.jpg','jpg');
+
+rmpath(genpath('../'))
