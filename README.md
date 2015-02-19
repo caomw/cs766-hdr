@@ -26,10 +26,10 @@ This is a brief description of our implementation. More details can be found in 
 * GUI to Pipeline the Image Recreation and Expose All Functions Implemented
 
 ## Program Screenshot:
-[[Documentation/images/GUI_Snapshot.jpg|alt=Program Screenshot]]
+![](Documentation/images/GUI_Snapshot.jpg)
 
 ## Image to be Vote:
-[[Documentation/images/FridayNight-Durand.jpg|alt=Sample Output]]
+![](Documentation/images/FridayNight-Durand.jpg)
 
 ## TODO:
 * [X] Identify & photograph our scene
