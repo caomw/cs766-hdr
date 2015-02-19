@@ -1,3 +1,7 @@
+%% Ke Ma, Christopher Bodden
+% CS 766 - Project 1 (HDR)
+
+%% Settings GUI for tone mapping
 function varargout = tone_map_settings(varargin)
 % TONE_MAP_SETTINGS MATLAB code for tone_map_settings.fig
 %      TONE_MAP_SETTINGS, by itself, creates a new TONE_MAP_SETTINGS or raises the existing
@@ -27,11 +31,11 @@ function varargout = tone_map_settings(varargin)
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @tone_map_settings_OpeningFcn, ...
-                   'gui_OutputFcn',  @tone_map_settings_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
+    'gui_Singleton',  gui_Singleton, ...
+    'gui_OpeningFcn', @tone_map_settings_OpeningFcn, ...
+    'gui_OutputFcn',  @tone_map_settings_OutputFcn, ...
+    'gui_LayoutFcn',  [] , ...
+    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
@@ -63,7 +67,7 @@ guidata(hObject, handles);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = tone_map_settings_OutputFcn(hObject, eventdata, handles) 
+function varargout = tone_map_settings_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB

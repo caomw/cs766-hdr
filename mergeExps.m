@@ -1,13 +1,7 @@
-%
-% mergeExps.m
-% 
-% Arguments:
-%
-% Z(y,x,j)
-% B(j)
-% g(z)
-% w(z)
-%
+%% Ke Ma, Christopher Bodden
+% CS 766 - Project 1 (HDR)
+
+%% Merges serval images in a single color channel
 function E = mergeExps(Z,B,g,w)
 %% Read image information
 height = size(Z,1);

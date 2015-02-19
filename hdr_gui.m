@@ -1,3 +1,6 @@
+%% Ke Ma, Christopher Bodden
+% CS 766 - Project 1 (HDR)
+
 function varargout = hdr_gui(varargin)
 % HDR_GUI MATLAB code for hdr_gui.fig
 %      HDR_GUI, by itself, creates a new HDR_GUI or raises the existing
@@ -27,11 +30,11 @@ function varargout = hdr_gui(varargin)
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @hdr_gui_OpeningFcn, ...
-                   'gui_OutputFcn',  @hdr_gui_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
+    'gui_Singleton',  gui_Singleton, ...
+    'gui_OpeningFcn', @hdr_gui_OpeningFcn, ...
+    'gui_OutputFcn',  @hdr_gui_OutputFcn, ...
+    'gui_LayoutFcn',  [] , ...
+    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
@@ -69,7 +72,7 @@ setappdata(handles.figure1,'DRAGO_betaVal', 0.85);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = hdr_gui_OutputFcn(hObject, eventdata, handles) 
+function varargout = hdr_gui_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -245,7 +248,11 @@ end
 
 images = getappdata(handles.figure1,'images');
 B = getappdata(handles.figure1,'exposureTimes');
+
+h = waitbar(0, 'Recovering Curves and Radiance Map...'); % start progress bar
 [radMap, rG, gG, bG, rPxVals, gPxVals, bPxVals, rLgExps, gLgExps, bLgExps] = makeRadmap(images,B,20);
+waitbar(1.0);
+close(h);
 
 cla(handles.red);
 cla(handles.green);

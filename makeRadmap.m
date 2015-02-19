@@ -1,3 +1,7 @@
+%% Ke Ma, Christopher Bodden
+% CS 766 - Project 1 (HDR)
+
+%% Recovers all response curves and constructs the radiance map
 function [radmap, rG, gG, bG, rPxVals, gPxVals, bPxVals, rLgExps, gLgExps, bLgExps] = makeRadmap(imgs,expTimes,smoothness)
 %% Load exposure time
 B = log(expTimes);

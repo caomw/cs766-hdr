@@ -1,5 +1,10 @@
+%% Ke Ma, Christopher Bodden
+% CS 766 - Project 1 (HDR)
+
+%% Samples pixels in a set of images (we have 2 possible options... uncomment the one you want to use)
 function Z = samplePxs(imgs)
-%% uniform sampler
+
+%% uniform sampler (removed for random sampler)
 % imgNum = size(imgs,3);
 % smpNumSqrt = round(sqrt(2*256/(imgNum - 1)));
 % smpNum = smpNumSqrt*smpNumSqrt;
@@ -15,6 +20,7 @@ function Z = samplePxs(imgs)
 %       k = k+1;
 %    end
 % end
+
 %% random sampler
 imgNum = size(imgs,3);
 smpNum = round(2*256/(imgNum - 1));

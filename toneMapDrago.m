@@ -1,13 +1,16 @@
-% Implementation of Drago et al. tone mapping algorithm!
+%% Ke Ma, Christopher Bodden
+% CS 766 - Project 1 (HDR)
+
+%% Implementation of Drago et al. tone mapping algorithm!
 % Adaptive Logarithmic Mapping For Displaying High Contrast Scenes
 % http://pages.cs.wisc.edu/~lizhang/courses/cs766-2012f/projects/hdr/Drago2003ALM.pdf
 % BONUS!
-
+%
 % Note: Slower, but vivid recreation
-
+%
 % Input: radMap - the RGB radiance map; b - the bias parameter (0.85 works best typically)
 % Output: image - the Low Dynamic Range, toned-mapped RGB image
-
+%
 function [image] = toneMapDrago(radMap, b)
 %convert to Yxy color space
 
@@ -58,7 +61,7 @@ function [bT] = bias(t ,b)
 bT = t .^ ( log(b) / log(0.5) );
 end
 
-% fix gamma based on paper method
+%% fix gamma based on paper method (nasty but it works well)
 function [image] = fixGamma(oldImage, gamma)
 slope = 4.5;
 start = 0.018;

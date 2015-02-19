@@ -1,3 +1,7 @@
+%% Ke Ma, Christopher Bodden
+% CS 766 - Project 1 (HDR)
+
+%% Script to test merging several exposures (may need tweaks to run on your setup)
 addpath(genpath('../')) % added to work with new directory structure
 
 %% Construct radiance map
