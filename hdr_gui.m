@@ -547,7 +547,7 @@ if isappdata(handles.figure1,'hAxes') && isappdata(handles.figure1,'images')
     images = getappdata(handles.figure1,'images');
     
     h = waitbar(0, 'Performing MTB alignment...'); % start progress bar
-    newImages = alignMTB(images, 0.2);
+    newImages = alignMTB(images, 0.1);
     waitbar(1.0);
     close(h);
     
