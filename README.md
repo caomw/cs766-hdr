@@ -14,5 +14,5 @@ Ke Ma, Christopher Bodden
   - [ ] Implement one or more extensions listed in the HDR section of Chapter 10
   - [ ] Run a small experiment with HDR video
 * [X] Finish GUI 
-* [ ] Documentation
-* [ ] Clean up/Comment code
+* [X] Documentation
+* [X] Clean up/Comment code
