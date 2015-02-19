@@ -22,7 +22,7 @@ function varargout = hdr_gui(varargin)
 
 % Edit the above text to modify the response to help hdr_gui
 
-% Last Modified by GUIDE v2.5 16-Feb-2015 08:51:06
+% Last Modified by GUIDE v2.5 18-Feb-2015 20:30:05
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -181,6 +181,10 @@ if isappdata(handles.figure1,'ldrDrawing')
     rmappdata(handles.figure1,'ldrDrawing');
 end
 
+if isappdata(handles.figure1,'finalImage')
+    rmappdata(handles.figure1,'finalImage');
+end
+
 set(handles.red,'Visible','off');
 set(handles.green,'Visible','off');
 set(handles.blue,'Visible','off');
@@ -188,6 +192,7 @@ cla(handles.red);
 cla(handles.green);
 cla(handles.blue);
 
+set(handles.saveFinal,'Enable','off');
 set(handles.saveRadMap,'Enable','off');
 set(handles.toneMap,'Enable','off');
 
@@ -348,6 +353,7 @@ end
 % reset
 set(handles.solve,'Enable','off');
 set(handles.align,'Enable','off');
+set(handles.saveFinal,'Enable','off');
 
 set(handles.red,'Visible','off');
 set(handles.green,'Visible','off');
@@ -377,6 +383,10 @@ if isappdata(handles.figure1,'ldrDrawing')
     ax = getappdata(handles.figure1,'ldrDrawing');
     cla(ax);
     rmappdata(handles.figure1,'ldrDrawing');
+end
+
+if isappdata(handles.figure1,'finalImage')
+    rmappdata(handles.figure1,'finalImage');
 end
 
 % read rad map from file
@@ -416,6 +426,10 @@ if isappdata(handles.figure1,'ldrDrawing')
     rmappdata(handles.figure1,'ldrDrawing');
 end
 
+if isappdata(handles.figure1,'finalImage')
+    rmappdata(handles.figure1,'finalImage');
+end
+
 beta = getappdata(handles.figure1,'DRAGO_betaVal');
 radMap = getappdata(handles.figure1,'radMap');
 h = waitbar(0, 'Performing tone mapping...'); % start progress bar
@@ -432,7 +446,9 @@ axesVal = {[1.0 1.0 1.0], handles.uipanel2, [1.0 1.0 1.0], 'off', 'off'};
 ldrDrawing = axes('Position', [x y axWidth axHight], axesProp, axesVal);
 imshow(DragoRGB,[]);
 
+setappdata(handles.figure1,'finalImage',DragoRGB);
 setappdata(handles.figure1,'ldrDrawing',ldrDrawing);
+set(handles.saveFinal,'Enable','on');
 
 
 % --------------------------------------------------------------------
@@ -446,6 +462,10 @@ if isappdata(handles.figure1,'ldrDrawing')
     ax = getappdata(handles.figure1,'ldrDrawing');
     cla(ax);
     rmappdata(handles.figure1,'ldrDrawing');
+end
+
+if isappdata(handles.figure1,'finalImage')
+    rmappdata(handles.figure1,'finalImage');
 end
 
 radMap = getappdata(handles.figure1,'radMap');
@@ -466,7 +486,9 @@ axesVal = {[1.0 1.0 1.0], handles.uipanel2, [1.0 1.0 1.0], 'off', 'off'};
 ldrDrawing = axes('Position', [x y axWidth axHight], axesProp, axesVal);
 imshow(ReinhardRGB,[]);
 
+setappdata(handles.figure1,'finalImage',ReinhardRGB);
 setappdata(handles.figure1,'ldrDrawing',ldrDrawing);
+set(handles.saveFinal,'Enable','on');
 
 % --------------------------------------------------------------------
 function matlabToneMap_Callback(hObject, eventdata, handles)
@@ -479,6 +501,10 @@ if isappdata(handles.figure1,'ldrDrawing')
     ax = getappdata(handles.figure1,'ldrDrawing');
     cla(ax);
     rmappdata(handles.figure1,'ldrDrawing');
+end
+
+if isappdata(handles.figure1,'finalImage')
+    rmappdata(handles.figure1,'finalImage');
 end
 
 radMap = getappdata(handles.figure1,'radMap');
@@ -498,7 +524,9 @@ axesVal = {[1.0 1.0 1.0], handles.uipanel2, [1.0 1.0 1.0], 'off', 'off'};
 ldrDrawing = axes('Position', [x y axWidth axHight], axesProp, axesVal);
 imshow(builtInRGB,[]);
 
+setappdata(handles.figure1,'finalImage',builtInRGB);
 setappdata(handles.figure1,'ldrDrawing',ldrDrawing);
+set(handles.saveFinal,'Enable','on');
 
 
 % --------------------------------------------------------------------
@@ -510,7 +538,11 @@ function align_Callback(hObject, eventdata, handles)
 if isappdata(handles.figure1,'hAxes') && isappdata(handles.figure1,'images')
     hAxes = getappdata(handles.figure1,'hAxes');
     images = getappdata(handles.figure1,'images');
+    
+    h = waitbar(0, 'Performing MTB alignment...'); % start progress bar
     newImages = alignMTB(images, 0.2);
+    waitbar(1.0);
+    close(h);
     
     for i = 1:size(newImages,4)
         cla(hAxes(i)); % clear
@@ -586,6 +618,10 @@ if isappdata(handles.figure1,'ldrDrawing')
     rmappdata(handles.figure1,'ldrDrawing');
 end
 
+if isappdata(handles.figure1,'finalImage')
+    rmappdata(handles.figure1,'finalImage');
+end
+
 contrast = getappdata(handles.figure1,'DURAND_contrastVal');
 radMap = getappdata(handles.figure1,'radMap');
 h = waitbar(0, 'Performing tone mapping...'); % start progress bar
@@ -604,7 +640,9 @@ axesVal = {[1.0 1.0 1.0], handles.uipanel2, [1.0 1.0 1.0], 'off', 'off'};
 ldrDrawing = axes('Position', [x y axWidth axHight], axesProp, axesVal);
 imshow(DurandRGB,[]);
 
+setappdata(handles.figure1,'finalImage',DurandRGB);
 setappdata(handles.figure1,'ldrDrawing',ldrDrawing);
+set(handles.saveFinal,'Enable','on');
 
 
 % --------------------------------------------------------------------
@@ -618,6 +656,10 @@ if isappdata(handles.figure1,'ldrDrawing')
     ax = getappdata(handles.figure1,'ldrDrawing');
     cla(ax);
     rmappdata(handles.figure1,'ldrDrawing');
+end
+
+if isappdata(handles.figure1,'finalImage')
+    rmappdata(handles.figure1,'finalImage');
 end
 
 gamma = getappdata(handles.figure1,'GAMMA_gammaVal');
@@ -638,7 +680,9 @@ axesVal = {[1.0 1.0 1.0], handles.uipanel2, [1.0 1.0 1.0], 'off', 'off'};
 ldrDrawing = axes('Position', [x y axWidth axHight], axesProp, axesVal);
 imshow(GammaRGB,[]);
 
+setappdata(handles.figure1,'finalImage',GammaRGB);
 setappdata(handles.figure1,'ldrDrawing',ldrDrawing);
+set(handles.saveFinal,'Enable','on');
 
 
 % --- Executes on mouse press over axes background.
@@ -672,3 +716,29 @@ function blue_ButtonDownFcn(hObject, eventdata, handles)
 newFig = figure();
 ax = copyobj(hObject,newFig);
 set(ax,'ActivePositionProperty', 'outerposition', 'Box', 'on', 'OuterPosition', [0 0 1 1], 'Position', [0.13 0.11 0.775 0.815], 'Units', 'normalized');
+
+
+% --------------------------------------------------------------------
+function save_Callback(hObject, eventdata, handles)
+% hObject    handle to save (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function saveFinal_Callback(hObject, eventdata, handles)
+% hObject    handle to saveFinal (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if isappdata(handles.figure1,'finalImage')
+    img = getappdata(handles.figure1,'finalImage');
+    [fileName, path] = uiputfile({'*.png;','PNG Files'},'Save Final Image');
+    
+    %return if no values
+    if fileName == 0
+        return
+    end
+    
+    imwrite(img, fullfile(path, fileName));
+end
